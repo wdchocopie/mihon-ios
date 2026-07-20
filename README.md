@@ -59,3 +59,15 @@ is a genuine, tested vertical slice; everything else is a boundary-correct stub
 with `TODO(port)` markers pointing at the Kotlin source and the relevant plan
 risk (R1–R9). The module boundary is verified: an accidental Apple-framework
 import in a core module would break the Linux CI build.
+
+## License
+
+Licensed under the Apache License, Version 2.0 — see [LICENSE](LICENSE) and
+[NOTICE](NOTICE).
+
+    Copyright 2026 The mihon-ios contributors
+
+A native iOS port of [Mihon](https://github.com/mihonapp/mihon) (Copyright 2015
+Javier Tomás; Copyright 2024 Mihon Open Source Project), licensed under Apache
+2.0. Mihon is a fork of Tachiyomi. Data models, algorithms, and behavior are
+reimplemented in Swift with the Mihon source as the reference specification.
