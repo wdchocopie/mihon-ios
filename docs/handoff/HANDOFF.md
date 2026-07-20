@@ -1,8 +1,32 @@
-# Handoff — 2026-07-19
+# Handoff — 2026-07-20
 
-**Session:** Read the Mihon source and the Keiyoushi extension catalog, then
-produce the Android→iOS conversion plan via parallel fan-out.
-**Branch / worktree:** none — folder is still not a git repository.
+**Session:** Planned the port (6-lane analysis), verified the zero-Mac build path
+(4-lane), then scaffolded the SPM module skeleton + CI signing pipeline.
+**Branch / worktree:** `main`, committed `8cff583`. Local only — no remote yet
+(publishing is gated on ADR-0). Repo IS now git-initialized.
+
+## Done this session (scaffold)
+
+- **Module skeleton committed.** Multi-module SPM package, boundary enforced from
+  commit 1: `MihonCore` + `MihonBackup` import no Apple framework (verified by
+  grep — only Foundation + cross-platform Crypto), build/test on Windows via
+  `swift test`. `MihonSources` (JavaScriptCore), `MihonData` (GRDB), `MihonUI`
+  (SwiftUI) are `#if canImport`-guarded so the package still builds everywhere.
+- **`SourceID` is a real, tested slice** — exact port of `HttpSource.id` MD5
+  (plan R4), with property tests that run on Windows. Golden-vector test is
+  `XCTSkip`-pending: R4 is NOT closed until real Mihon IDs are pinned.
+- Everything else is a boundary-correct `TODO(port)` stub citing its Kotlin
+  source + plan risk.
+- **CI:** `core-tests.yml` (Linux build+test per push — the boundary gate),
+  `ios-build.yml` (macOS: XcodeGen → fastlane match → build → TestFlight, manual
+  trigger). `project.yml`, `fastlane/Fastfile`+`Matchfile`, `Gemfile`, `App/`
+  entry, `README.md`, `.gitattributes` (LF), `.gitignore`.
+- **NOT COMPILED** — authored on Windows with no toolchain installed. First
+  `swift build` on a Swift machine is the real check; it fetches swift-crypto.
+
+## Prior session (planning) — still current
+
+
 
 ## Done this session
 
