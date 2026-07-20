@@ -262,6 +262,11 @@ importer work**; budget for a fully hand-written decoder.
 **R4 — Source IDs must be bit-exact or every import silently orphans.** Restored
 rows carry `source: Long`; if the runtime invents its own IDs, the import reports
 success and produces an empty library. Hard requirement on Lane 1, not a preference.
+✅ *Verified 2026-07-21:* `MihonCore.SourceID` reproduces real Keiyoushi index IDs
+exactly (12 golden vectors in-test; an independent Python cross-check matched
+1793/2016 = 88.9% of all index IDs with `versionId=1`, the ~11% remainder being
+sources that override `versionId`). The MD5 port is bit-exact; what remains is
+that the chosen runtime must actually *use* these IDs.
 
 **R5 — iOS jetsam.** No warning, no graceful degradation — the app is killed. A
 20,000px webtoon strip is 300+ MB as ARGB8888. **Ban `UIImage(data:)` by lint
