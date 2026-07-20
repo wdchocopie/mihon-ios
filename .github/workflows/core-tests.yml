@@ -1,0 +1,33 @@
+# Platform-agnostic core: build + test on Linux, free and fast, on every push.
+# This is the per-commit gate that proves the no-Apple-framework boundary holds
+# (an accidental UIKit/SwiftUI/JavaScriptCore import in a core module breaks the
+# Linux build) AND runs the real unit tests — SourceID parity, model stability,
+# backup models — with no Mac in the loop.
+#
+# Your local loop on Windows is the same command: `swift test`.
+name: core-tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    name: swift test (Linux)
+    runs-on: ubuntu-latest
+    container: swift:6.0-jammy
+    steps:
+      - uses: actions/checkout@v4
+      # Builds ALL targets: the Apple modules (MihonSources/MihonData/MihonUI)
+      # compile to empty via `#if canImport(...)`, so this staying green is the
+      # boundary check.
+      - name: Build
+        run: swift build
+      - name: Test
+        run: swift test --parallel
+
+  # Windows leg is intentionally omitted from CI: the developer's Windows machine
+  # IS the Windows check (they run `swift test` locally). Add a windows-latest job
+  # with the swiftlang toolchain here later if a second guard is wanted.

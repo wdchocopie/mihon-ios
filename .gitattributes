@@ -1,0 +1,15 @@
+# Normalize to LF in the repo. Critical for files that run on the CI Linux/macOS
+# runners (shell in .yml, .sh scripts) — CRLF would break them.
+* text=auto eol=lf
+
+*.swift text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.sh    text eol=lf
+*.rb    text eol=lf
+*.md    text eol=lf
+
+# Binary assets — never touch.
+*.png binary
+*.jpg binary
+*.pdf binary

@@ -1,0 +1,7 @@
+# fastlane match config — where the encrypted signing store lives.
+# git_url + basic-auth come from CI env (MATCH_GIT_URL / MATCH_GIT_BASIC_AUTHORIZATION).
+git_url(ENV["MATCH_GIT_URL"])
+storage_mode("git")
+type("appstore")
+app_identifier(["app.mihon.ios"])
+# The MATCH_PASSWORD env var decrypts the store; never commit it.

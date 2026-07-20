@@ -1,0 +1,50 @@
+# === Swift / SPM ===
+.build/
+.swiftpm/
+Package.resolved
+*.xcworkspace/xcuserdata/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# === Xcode ===
+# The .xcodeproj is GENERATED from project.yml by XcodeGen on CI — never committed.
+*.xcodeproj
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.perspectivev3
+!default.perspectivev3
+
+# === fastlane / signing secrets ===
+fastlane/private_keys/
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output
+
+# === Secrets — never commit ===
+.env
+.env.*
+!.env.example
+*.p8
+*.p12
+*.mobileprovision
+*.cer
+ExportOptions.plist
+AuthKey_*.p8
+
+# === Vendored Android reference ===
+# The Mihon source under android/ is a read-only reference, not our code.
+# Fetch it with a script or a submodule rather than committing ~81k lines.
+/android/
+
+# === Local scratch ===
+*.log
+.DS_Store
+Thumbs.db

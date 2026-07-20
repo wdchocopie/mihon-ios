@@ -1,0 +1,49 @@
+# fastlane build + sign + TestFlight upload, driven entirely by an App Store
+# Connect API key (no Apple ID, no 2FA, no Mac). Runs on the macOS CI runner.
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and upload a signed build to TestFlight"
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: "fastlane/private_keys/AuthKey.p8",
+      in_house: false
+    )
+
+    # Pulls certificates + provisioning profiles from the private match repo.
+    # read_only: the store is populated once (see README) and never mutated by CI.
+    match(
+      type: "appstore",
+      readonly: true,
+      api_key: api_key
+    )
+
+    build_app(
+      scheme: "Mihon",
+      export_method: "app-store",
+      # Manual signing against the match-provisioned profile — deliberately NOT
+      # xcodebuild automatic signing, which burns the 2-cert limit on ephemeral
+      # runners and then fails (see plan "Verified July 2026").
+      export_options: {
+        signingStyle: "manual"
+      }
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Populate the match certificate store — run ONCE, locally is impossible without a Mac, so run via a temporary writable CI job"
+  lane :bootstrap_signing do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: "fastlane/private_keys/AuthKey.p8"
+    )
+    match(type: "appstore", readonly: false, api_key: api_key)
+  end
+end
