@@ -1,0 +1,14 @@
+mihon-ios
+Copyright 2026 The mihon-ios contributors
+
+mihon-ios is a native iOS (Swift/SwiftUI) port of Mihon. It includes and derives
+from work in the Mihon source code — data models, wire/serialization formats,
+algorithms, and runtime behavior reimplemented in Swift, using the Mihon source
+as the reference specification.
+
+Derived from Mihon (https://github.com/mihonapp/mihon):
+  Copyright 2015 Javier Tomás
+  Copyright 2024 Mihon Open Source Project
+  Licensed under the Apache License, Version 2.0.
+
+Mihon is a fork of Tachiyomi, originally created by Javier Tomás.
