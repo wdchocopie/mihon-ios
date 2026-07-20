@@ -5,7 +5,26 @@
 **Branch / worktree:** `main`, committed `8cff583`. Local only — no remote yet
 (publishing is gated on ADR-0). Repo IS now git-initialized.
 
-## Done this session (scaffold)
+## Published + verified (2026-07-20)
+
+- **Repo is live and PUBLIC:** https://github.com/wdchocopie/mihon-ios
+  (pushed on the `wdchocopie` gh account; `main` tracks `origin/main`).
+- **CI green.** `core-tests.yml` ran on the push and passed on the Linux runner
+  (free, ~35 s) — proves the scaffold compiles and tests pass, and that the
+  no-Apple-framework boundary holds.
+- **Local build+test green on Windows** (Swift 6.3.3): `swift build` +
+  `swift test` → 10 pass, 1 skipped (`SourceID` golden vectors, pending R4), 0
+  fail. So the free local loop is real and working.
+- **Toolchain gotcha resolved:** `SDKROOT` must point at
+  `…\Swift\Platforms\6.3.3\Windows.platform\Developer\SDKs\Windows.sdk`. It is
+  ALREADY persisted in the user env by the installer, so a **fresh terminal**
+  works with no action. The failure I first hit was only because this session's
+  shell predated the install. (Harmless `.build\debug` symlink warning unless
+  Windows Developer Mode is on.)
+- Note: the first two commits went directly to `main` to bootstrap the repo.
+  **From here, feature/module work uses the branch → PR flow** per AGENTS.md.
+
+## Done earlier this session (scaffold)
 
 - **Module skeleton committed.** Multi-module SPM package, boundary enforced from
   commit 1: `MihonCore` + `MihonBackup` import no Apple framework (verified by
