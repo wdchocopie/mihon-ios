@@ -1,9 +1,31 @@
 # Handoff — 2026-07-20
 
-**Session:** Planned the port (6-lane analysis), verified the zero-Mac build path
-(4-lane), then scaffolded the SPM module skeleton + CI signing pipeline.
-**Branch / worktree:** `main`, committed `8cff583`. Local only — no remote yet
-(publishing is gated on ADR-0). Repo IS now git-initialized.
+**Session:** Planned the port, verified the zero-Mac build path, scaffolded the
+SPM skeleton + CI, published the repo, then ran the `.tachibk` decoder spike.
+**Branch:** `spike/tachibk-decoder` (off `main`) — open PR into `main`.
+
+## `.tachibk` decoder spike — DONE (2026-07-20)
+
+- **Schema derived from the Mihon source** (the real `@ProtoNumber` annotations),
+  logged in `docs/specs/2026-07-20-tachibk-decoder-design.md` — the "derived
+  .proto" the plan asked for.
+- **Answer to the spike question:** it's gzipped kotlinx-protobuf, and
+  swift-protobuf is the WRONG tool — three kotlinx conventions force a
+  hand-rolled reader: non-packed repeated scalars, Kotlin default-omission, and
+  the polymorphic `PreferenceValue` sealed class. Built a ~200-line dependency-
+  free wire reader/writer + models + decoder in `MihonBackup`, all
+  platform-agnostic (tests run on Windows).
+- **Reading the source caught a data-loss trap (R3):** `BackupManga.favorite`
+  defaults to **true** — a naive bool-defaults-false decoder would silently
+  un-favorite every restored manga. There's an explicit regression test for it.
+- **22 tests green** locally on Windows (11 new backup tests): favorite-default
+  guard, full logical round-trip, forward-compat field skipping, container
+  detection, MangaRestorer parity rules (tracking remoteId, viewer-flags
+  fallback).
+- **DEFERRED / pending:** gzip inflate (outer wrapper — magic detection done),
+  `PreferenceValue` polymorphic decode, byte-exact export. **R3 is
+  "characterized", not "closed"** — closing it needs a REAL `.tachibk` exported
+  from Mihon to validate the derived schema against actual bytes. Ask the user.
 
 ## Published + verified (2026-07-20)
 
