@@ -44,13 +44,4 @@ public struct MangasPage: Sendable, Hashable, Codable {
     }
 }
 
-/// Placeholder for Mihon's sealed `Filter` hierarchy (Header, Select, Text,
-/// CheckBox, TriState, Group, Sort — `source-api/.../model/Filter.kt`).
-///
-/// TODO(port): model the full hierarchy. The verifier flagged that
-/// `Filter.Group<V>` dispatches on class identity and does not reduce cleanly to
-/// a declarative schema — it needs an opaque per-source payload that round-trips
-/// through the JS runtime. Design this with the runtime, not before it.
-public struct FilterList: Sendable, Hashable, Codable {
-    public init() {}
-}
+// `FilterList` and the `Filter` hierarchy now live in `Filter.swift`.
