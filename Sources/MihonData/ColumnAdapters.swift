@@ -29,7 +29,9 @@ public enum StringListColumnAdapter {
 /// `.alwaysUpdate`, mirroring Kotlin's `getOrElse { ALWAYS_UPDATE }`.
 public enum UpdateStrategyColumnAdapter {
     public static func decode(_ dbValue: Int64) -> UpdateStrategy {
-        UpdateStrategy(rawValue: Int(truncatingIfNeeded: dbValue)) ?? .alwaysUpdate
+        // Narrow to 32 bits first to match Kotlin's `databaseValue.toInt()`
+        // before the enum lookup (they differ only for out-of-band stored values).
+        UpdateStrategy(rawValue: Int(Int32(truncatingIfNeeded: dbValue))) ?? .alwaysUpdate
     }
 
     public static func encode(_ value: UpdateStrategy) -> Int64 {

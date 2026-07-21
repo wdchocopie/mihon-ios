@@ -67,6 +67,12 @@ public enum HistoryMapper {
     }
 }
 
+// DEFERRED (with the view read-models, per the spec): the view/relation mappers
+// `mapLibraryManga` (LibraryManga — categories split on "," → [Int64], readCount/
+// bookmarkCount Double→Int64 truncation), `mapMangaWithChapterCount`, and
+// `mapHistoryWithRelations`. These depend on the libraryView/historyView queries
+// and the expanded read-models, which land with the GRDB execution tier.
+
 public enum TrackMapper {
     /// `manga_sync` row → `Track`. `sync_id` is the tracker id, `remote_id` the
     /// remote media id, `library_id` nullable.

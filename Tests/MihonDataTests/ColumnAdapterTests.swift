@@ -44,6 +44,12 @@ final class ColumnAdapterTests: XCTestCase {
         XCTAssertEqual(UpdateStrategyColumnAdapter.decode(-1), .alwaysUpdate)
     }
 
+    func testUpdateStrategyNarrowsTo32BitsLikeKotlin() {
+        // Kotlin `databaseValue.toInt()` keeps the low 32 bits: 0x1_0000_0001 → 1.
+        XCTAssertEqual(UpdateStrategyColumnAdapter.decode(0x1_0000_0001), .onlyFetchOnce)
+        XCTAssertEqual(UpdateStrategyColumnAdapter.decode(0x1_0000_0000), .alwaysUpdate)
+    }
+
     // MARK: Boolean
 
     func testBooleanAdapter() {
