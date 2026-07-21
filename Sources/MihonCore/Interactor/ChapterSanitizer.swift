@@ -4,7 +4,10 @@ import Foundation
 /// `trim()` → `removePrefix(mangaTitle)` → trim a specific whitespace+separator set.
 public enum ChapterSanitizer {
     public static func sanitize(_ name: String, title: String) -> String {
-        var s = trim(name) { $0.isWhitespace }
+        // Step 1 uses Kotlin's whitespace definition (see `isKotlinWhitespace`),
+        // NOT Swift's Unicode White_Space — they diverge on U+0085 and U+001C–1F,
+        // and step 1 gates the title-prefix removal.
+        var s = trim(name) { isKotlinWhitespaceCharacter($0) }
         if !title.isEmpty, s.hasPrefix(title) {
             s = String(s.dropFirst(title.count))
         }
@@ -31,19 +34,49 @@ public enum ChapterSanitizer {
 
 public extension Chapter {
     /// Ports `Chapter.copyFromSChapter`: name/url/dateUpload/chapterNumber/scanlator/memo
-    /// from a source chapter. Blank scanlator → nil, else trimmed.
+    /// from a source chapter. Blank scanlator → nil, else trimmed (Kotlin
+    /// `scanlator?.ifBlank { null }?.trim()`, using Kotlin's whitespace set).
     func copyFrom(sChapter: SChapter) -> Chapter {
         var c = self
         c.name = sChapter.name
         c.url = sChapter.url
         c.dateUpload = sChapter.dateUpload
         c.chapterNumber = Double(sChapter.chapterNumber)
-        if let s = sChapter.scanlator, !s.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            c.scanlator = s.trimmingCharacters(in: .whitespacesAndNewlines)
-        } else {
-            c.scanlator = nil
-        }
+        c.scanlator = normalizeScanlator(sChapter.scanlator)
         c.memo = sChapter.memo
         return c
+    }
+}
+
+/// Kotlin `scanlator?.ifBlank { null }?.trim()` — nil if nil or all-whitespace,
+/// otherwise trimmed, using Kotlin's whitespace definition.
+public func normalizeScanlator(_ scanlator: String?) -> String? {
+    guard let s = scanlator else { return nil }
+    let trimmed = trimKotlinWhitespace(s)
+    return trimmed.isEmpty ? nil : trimmed
+}
+
+func trimKotlinWhitespace(_ s: String) -> String {
+    var slice = Substring(s)
+    while let first = slice.first, isKotlinWhitespaceCharacter(first) { slice = slice.dropFirst() }
+    while let last = slice.last, isKotlinWhitespaceCharacter(last) { slice = slice.dropLast() }
+    return String(slice)
+}
+
+/// A `Character` that is a single scalar matching `isKotlinWhitespace`. All
+/// whitespace is single-scalar BMP, so this maps 1:1 onto Kotlin's per-`Char` trim.
+func isKotlinWhitespaceCharacter(_ c: Character) -> Bool {
+    c.unicodeScalars.count == 1 && isKotlinWhitespace(c.unicodeScalars.first!)
+}
+
+/// Matches Kotlin's `Char.isWhitespace()` (= Java `isWhitespace() || isSpaceChar()`),
+/// which differs from Swift's Unicode `White_Space`: Kotlin **excludes** U+0085
+/// (NEL) and **includes** U+001C–U+001F (FS/GS/RS/US). Everything else — the
+/// space separators (incl. no-break) and U+0009–000D/2028/2029 — agrees.
+func isKotlinWhitespace(_ scalar: Unicode.Scalar) -> Bool {
+    switch scalar.value {
+    case 0x1C...0x1F: return true
+    case 0x85: return false
+    default: return scalar.properties.isWhitespace
     }
 }

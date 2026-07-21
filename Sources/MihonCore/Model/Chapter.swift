@@ -55,7 +55,9 @@ public struct Chapter: Sendable, Hashable, Identifiable, Codable {
         c.url = other.url
         c.dateUpload = other.dateUpload
         c.chapterNumber = other.chapterNumber
-        if let s = other.scanlator, !s.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        // Blank check uses Kotlin's whitespace set (isKotlinWhitespace); the value
+        // itself is kept untrimmed, matching the Chapter→Chapter copy.
+        if let s = other.scanlator, !trimKotlinWhitespace(s).isEmpty {
             c.scanlator = s
         } else {
             c.scanlator = nil

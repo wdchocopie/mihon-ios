@@ -7,6 +7,26 @@ final class ChapterSanitizerTests: XCTestCase {
         XCTAssertEqual(ChapterSanitizer.sanitize("  : Bleach :  ", title: "X"), "Bleach")
         XCTAssertEqual(ChapterSanitizer.sanitize("Naruto", title: "Naruto"), "")
     }
+
+    // Kotlin whitespace ≠ Swift Unicode White_Space (verification Finding 1).
+    func testKotlinWhitespaceSet() {
+        // U+001C (FS) IS Kotlin-whitespace → step-1 trims it, prefix removed.
+        XCTAssertEqual(
+            ChapterSanitizer.sanitize("\u{1C}One Piece Chapter 5", title: "One Piece"),
+            "Chapter 5"
+        )
+        // U+0085 (NEL) is NOT Kotlin-whitespace → not trimmed in step 1, so the
+        // prefix stays glued and is not removed (only the trailing/leading trimChars run).
+        XCTAssertEqual(
+            ChapterSanitizer.sanitize("\u{85}One Piece 5", title: "One Piece"),
+            "One Piece 5"
+        )
+        // Scanlator: lone NEL is NOT blank in Kotlin → stays; lone FS IS blank → nil.
+        XCTAssertEqual(normalizeScanlator("\u{85}"), "\u{85}")
+        XCTAssertNil(normalizeScanlator("\u{1C}"))
+        XCTAssertNil(normalizeScanlator("   "))
+        XCTAssertEqual(normalizeScanlator("\u{1C}Group"), "Group")
+    }
 }
 
 final class ChapterSyncTests: XCTestCase {
