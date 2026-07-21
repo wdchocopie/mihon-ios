@@ -10,20 +10,22 @@ public struct SChapter: Sendable, Hashable, Codable {
     public var scanlator: String?
     /// Upload time, epoch milliseconds (Mihon uses `Long` millis).
     public var dateUpload: Int64
-
-    // TODO(port): `memo: JsonObject`.
+    /// Source-specific metadata (since extensions-lib 1.6).
+    public var memo: JSONValue
 
     public init(
         url: String,
         name: String,
         chapterNumber: Float = -1,
         scanlator: String? = nil,
-        dateUpload: Int64 = 0
+        dateUpload: Int64 = 0,
+        memo: JSONValue = .empty
     ) {
         self.url = url
         self.name = name
         self.chapterNumber = chapterNumber
         self.scanlator = scanlator
         self.dateUpload = dateUpload
+        self.memo = memo
     }
 }
