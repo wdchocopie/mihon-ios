@@ -58,5 +58,6 @@ let package = Package(
         // ---- TESTS (run on Windows/Linux) ----
         .testTarget(name: "MihonCoreTests", dependencies: ["MihonCore"]),
         .testTarget(name: "MihonBackupTests", dependencies: ["MihonBackup"]),
+        .testTarget(name: "MihonDataTests", dependencies: ["MihonData"]),
     ]
 )

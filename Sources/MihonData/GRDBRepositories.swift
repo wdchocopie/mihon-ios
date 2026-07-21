@@ -1,27 +1,25 @@
 import Foundation
-import MihonCore
 
-// GRDB-backed persistence (ADR-2). GRDB is added as a package dependency only
-// after the Wave-0 check confirms it builds cleanly on the Windows toolchain
-// (plan: "verify which dependencies build on Windows"). Until then this module
-// carries no external dependency, and its body is guarded so the package builds
-// on every platform. GRDB is SQLite-based (SQLite is cross-platform), so it may
-// well build on Windows — but that is to be verified, not assumed.
-#if canImport(GRDB)
-import GRDB
-
-// TODO(port): GRDBMangaRepository: MangaRepository, backed by a DatabasePool.
-// Keep the 5 SQLite TRIGGERS and 3 views in SQL (do NOT reimplement in Swift):
-// they drive the version/last_modified_at sync semantics and a naive port that
-// drops them corrupts sync silently (plan R / ADR-2). Land the trigger
-// conformance test suite BEFORE any repository code.
-
-#else
-
-/// Stand-in so the module always has a symbol. Replaced by the GRDB-backed
-/// repositories once the dependency is wired in.
-public enum MihonDataPlaceholder {
-    public static let pendingGRDB = true
+// GRDB-backed repository implementations — the live SQLite execution tier — are
+// a **CI-gated follow-up**, deliberately NOT in this module yet.
+//
+// Why: GRDB cannot build on the Windows dev toolchain — its checkout fails on a
+// symlink permission error, and it needs a system SQLite that Windows Swift does
+// not ship. So the GRDB tier can only be built/tested on the Linux CI runner (or
+// Apple), where a `libsqlite3-dev` + GRDB pipeline must be set up. Building it
+// here would be entirely blind (no local compile), which fails the correctness bar.
+//
+// This module (`MihonData`) therefore ships the **GRDB-agnostic core** that IS
+// fully Windows-testable and holds all the bit-exact, backup-boundary-critical
+// content:
+//   - `MihonSchema`      — the complete baseline DDL (9 tables, 7 triggers, 3 views)
+//   - `ColumnAdapters`   — genre ", " join, updateStrategy, memo, boolean, date
+//   - `Mappers`          — row-columns → domain entities
+//
+// The follow-up adds `MihonDataGRDB` (a separate target with a platform-scoped
+// GRDB dependency) implementing the `MihonCore` repository protocols against a
+// real database, plus the trigger-conformance suite that proves the version
+// counters increment correctly — which can only run against a live SQLite engine.
+public enum MihonDataInfo {
+    public static let liveDatabaseTier = "deferred — see GRDBRepositories.swift"
 }
-
-#endif
