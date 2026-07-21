@@ -74,14 +74,27 @@ public func getChapterSort(
 
     case Manga.chapterSortingAlphabet:
         if descending {
-            return { c1, c2 in comparisonToInt(c2.name.localizedStandardCompare(c1.name)) }
+            return { c1, c2 in collatorCompare(c2.name, c1.name) }
         } else {
-            return { c1, c2 in comparisonToInt(c1.name.localizedStandardCompare(c2.name)) }
+            return { c1, c2 in collatorCompare(c1.name, c2.name) }
         }
 
     default:
         fatalError("Invalid chapter sorting method: \(manga.sorting)")
     }
+}
+
+/// PRIMARY-strength collation matching Mihon's `compareToWithCollator`
+/// (`Collator(strength = PRIMARY)`): case- and diacritic-insensitive, then a
+/// **lexical** (codepoint) compare — deliberately NOT numeric. This differs from
+/// `localizedStandardCompare`, which does Finder-style numeric runs and would
+/// invert e.g. "Chapter 2" vs "Chapter 10". Folding + `<` is also deterministic
+/// across platforms (avoids Linux-vs-Apple ICU collation drift).
+private func collatorCompare(_ a: String, _ b: String) -> Int {
+    let fa = a.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+    let fb = b.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+    if fa == fb { return 0 }
+    return fa < fb ? -1 : 1
 }
 
 @inline(__always)

@@ -26,13 +26,19 @@ public enum ChapterRecognition {
     /// yields more than one candidate number. NOTE: `volume` MUST stay in the
     /// alternation — `vol` alone does not match `volume64`.
     private static let unwanted = try! NSRegularExpression(
-        pattern: #"\b(?:v|ver|vol|version|volume|season|s)[^a-z]?[0-9]+"#
+        // Java `\b`/`\w` are ASCII-only; ICU's are Unicode-aware. Input is already
+        // lowercased, so reproduce Java's ASCII left word-boundary with a
+        // negative lookbehind on ASCII word chars — else a non-ASCII prefix
+        // (e.g. "봄vol1") would suppress the boundary and mis-parse the number.
+        pattern: #"(?<![a-z0-9_])(?:v|ver|vol|version|volume|season|s)[^a-z]?[0-9]+"#
     )
 
     /// Whitespace directly before an `extra`/`special`/`omake` tag (removed so the
     /// tag binds to the preceding number).
     private static let unwantedWhiteSpace = try! NSRegularExpression(
-        pattern: #"\s(?=extra|special|omake)"#
+        // Java `\s` is ASCII [ \t\n\x0B\f\r]; ICU `\s` also matches Unicode spaces
+        // (e.g. NBSP). Pin the ASCII set so a non-breaking space isn't stripped.
+        pattern: #"[ \t\n\x0B\f\r](?=extra|special|omake)"#
     )
 
     // MARK: Public API

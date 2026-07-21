@@ -106,7 +106,14 @@ public enum FetchInterval {
 
         let daysToAdd = (cycle + 1) * abs(interval)
         let nextDate = calendar.date(byAdding: .day, value: daysToAdd, to: latestDate) ?? latestDate
-        return Int64((nextDate.timeIntervalSince1970 * 1000).rounded())
+        // Kotlin converts the next local-midnight with `dateTime.offset` — the
+        // FIXED offset of the reference instant — not the offset in effect at
+        // nextDate. Across a DST boundary those differ; correct for it so the
+        // result matches Mihon for any TimeZone (a no-op in UTC).
+        let fixedOffset = timeZone.secondsFromGMT(for: dateTime)
+        let nextOffset = timeZone.secondsFromGMT(for: nextDate)
+        let correctedSeconds = nextDate.timeIntervalSince1970 + Double(nextOffset - fixedOffset)
+        return Int64((correctedSeconds * 1000).rounded())
     }
 
     /// Faithful port of Kotlin `increaseInterval`: recursively doubles `delta` while

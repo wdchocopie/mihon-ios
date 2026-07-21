@@ -119,3 +119,30 @@ A 3-lens adversarial review ran before this build. Verdicts: all
 
 All corrections live in the context pack's "REVIEW CORRECTIONS" header, which the
 builders read first.
+
+## Review-all resolutions (Phase 4, applied 2026-07-21)
+
+After the build, a 3-lens adversarial verification traced the Swift against the
+Kotlin for divergences the (ASCII-only) upstream golden vectors miss. **Fixed**
+(each with a regression test in `DomainRegressionTests`):
+- **ChapterRecognition `\b`/`\s`** were ICU-Unicode-aware but Java's are
+  ASCII-only — a **non-ASCII manga title** (the norm) mis-parsed volume tags and
+  NBSP-glued keywords. Pinned to ASCII semantics.
+- **ChapterSort alphabetical** used `localizedStandardCompare` (numeric runs:
+  "Chapter 2" before "Chapter 10") — Kotlin's `Collator(PRIMARY)` is lexical
+  ("Chapter 10" first). Replaced with a fold-then-lexical compare (also
+  cross-platform-deterministic, fixing the Linux-vs-Apple collation concern).
+- **JSONValue** collapsed all numbers to `Double`, losing large-integer precision
+  and making `1` == `1.0` — which broke the `ShouldUpdateDbChapter` memo
+  dirty-check (missed refreshes). Added `case int(Int64)` (kotlinx content-equality parity).
+- **FetchInterval.calculateNextUpdate** used the DST offset at the target date
+  instead of the reference instant's fixed offset (off-by-an-hour in non-UTC
+  zones across a DST boundary). Corrected to the fixed offset.
+
+**Deferred as documented micro-divergences** (rare inputs, diminishing returns):
+- Numbers outside `Double` range in `memo` (e.g. `1e400`) — astronomically rare;
+  the `.int` case covers all realistic values. Noted in `JSONValue`.
+- `String.trim()` control-char set (U+001C–U+001F) — never adjacent to the parsed
+  number in practice.
+- `SManga.status` as a closed enum vs Kotlin's open `Int` — SManga is a transient
+  source model, not persisted; unknown codes are out of v1 scope.
